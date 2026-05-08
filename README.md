@@ -31,7 +31,7 @@ Construir uma API REST funcional do zero usando Django, com foco em:
 
 ```bash
 # Clone o repositório
-git clone https://github.com/Wellington-Roveder/crud-django-aprendizado.git
+git clone https://github.com/Wellington-Roveder/django-produtos-api.git
 cd crud-django-aprendizado
 
 # Instale as dependências
