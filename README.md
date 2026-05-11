@@ -1,5 +1,4 @@
 # 🛒 Django REST CRUD — API de Produtos
-
 > Projeto de aprendizado focado em consolidar o uso do **Django REST Framework** e **testes unitários** com uma API CRUD completa.
 
 ---
@@ -32,7 +31,7 @@ Construir uma API REST funcional do zero usando Django, com foco em:
 ```bash
 # Clone o repositório
 git clone https://github.com/Wellington-Roveder/django-produtos-api.git
-cd crud-django-aprendizado
+cd django-produtos-api
 
 # Instale as dependências
 pip install -r requirements.txt
@@ -94,6 +93,16 @@ Base URL: `http://localhost:8000/api/`
 
 ---
 
+## 🖥️ Interface
+
+### GET — Listagem de produtos
+![GET API](assets/get_api.png)
+
+### POST — Criação com HTTP 201 Created
+![POST API](assets/post_api.png)
+
+---
+
 ## 🧪 Testes
 
 ```bash
@@ -110,12 +119,15 @@ Cobertura de testes implementada:
 | `test_put_produto` | PUT atualiza produto completo |
 | `test_atualizar_produto` | PATCH atualiza campos parciais |
 
+### Resultado dos testes
+![Testes unitários](assets/teste_unitario.png)
+
 ---
 
 ## 🗂️ Estrutura do projeto
 
 ```
-LEARNINGDJANGO/
+django-produtos-api/
 ├── config/
 │   ├── settings.py        # Configurações do projeto
 │   ├── urls.py            # Roteamento principal
@@ -126,6 +138,7 @@ LEARNINGDJANGO/
 │   ├── views.py           # ViewSet CRUD
 │   ├── admin.py           # Registro no admin
 │   └── tests.py           # Testes unitários dos endpoints
+├── assets/                # Screenshots da interface e testes
 ├── .env.example
 ├── .gitignore
 ├── requirements.txt
@@ -146,7 +159,7 @@ Cada operação CRUD tem um teste independente com `setUp` criando um produto ba
 `SECRET_KEY`, `DEBUG` e todas as credenciais do banco saem do código e vão para o `.env` — boas práticas desde o primeiro projeto.
 
 **Serializer customizado**
-`data_criacao` formatada como `dd/mm/yyyy HH:MM:SS` no serializer, sem lógica no model.
+`data_criacao` formatada como `dd/mm/yyyy HH:MM:SS` no serializer com `read_only=True` — campo preenchido automaticamente pelo banco, sem input externo.
 
 ---
 
