@@ -79,8 +79,38 @@ Base URL: `http://localhost:8000/api/`
 | DELETE | `/produtos/{id}/` | Remove um produto |
 
 ---
+## 🔐 Autenticação JWT
 
+Todos os endpoints exigem autenticação via Bearer Token.
+
+### Obter token
+
+**POST** `/api/token/`
+
+```json
+{
+    "username": "seu_usuario",
+    "password": "sua_senha"
+}
+```
+
+**Resposta:**
+```json
+{
+    "access": "token_de_acesso",
+    "refresh": "token_de_refresh"
+}
+```
+
+### Usar o token
+
+No header de cada requisição:
+```
+Authorization: Bearer {access_token}
+```
 ## 📋 Exemplo de payload
+
+---
 
 ```json
 {
