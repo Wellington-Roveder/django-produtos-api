@@ -23,6 +23,7 @@ Construir uma API REST funcional do zero usando Django, com foco em:
 | Django REST Framework | Construção da API REST |
 | PostgreSQL | Banco de dados |
 | python-dotenv | Gerenciamento de variáveis de ambiente |
+| djangorestframework-simplejwt | autenticaçao jwt nos endpoints|
 
 ---
 
@@ -108,9 +109,10 @@ No header de cada requisição:
 ```
 Authorization: Bearer {access_token}
 ```
-## 📋 Exemplo de payload
 
 ---
+
+## 📋 Exemplo de payload
 
 ```json
 {
@@ -191,6 +193,8 @@ Cada operação CRUD tem um teste independente com `setUp` criando um produto ba
 **Serializer customizado**
 `data_criacao` formatada como `dd/mm/yyyy HH:MM:SS` no serializer com `read_only=True` — campo preenchido automaticamente pelo banco, sem input externo.
 
+**Autenticação JWT**
+Uso da framework djangorestframework-simplejwt , para restringir o acesso aos ndpoints.O servidor não precisa salvar informações da sessão em banco de dados ou memória. O token carregado pelo cliente contém tudo o que é necessário para a validação, o que facilita o escalonamento horizontal da aplicação
 ---
 
 ## 🚀 Status
