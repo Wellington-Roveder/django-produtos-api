@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 
 from dotenv import load_dotenv
+from rest_framework.throttling import UserRateThrottle
 import os
 
 
@@ -42,14 +43,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'produtos',
      'rest_framework',
-     'rest_framework_simplejwt'
+     'rest_framework_simplejwt',
+     'corsheaders'
 
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -111,9 +114,38 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
       "DEFAULT_AUTHENTICATION_CLASSES":(
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+      "DEFAULT_THROTTLE_CLASSES": (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle' ),
+       
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/min',
+        'user': '1000/day'
+    },
 }
-    
+
+CORS_ALLOW_METHODS = (
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+)
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+)
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
