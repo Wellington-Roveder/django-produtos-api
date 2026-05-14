@@ -28,6 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
+SECURE_SSL_REDIRECT = not DEBUG
 
 ALLOWED_HOSTS = []
 
@@ -117,7 +118,7 @@ REST_FRAMEWORK = {
     ),
       "DEFAULT_THROTTLE_CLASSES": (
         'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle' ),
+        'rest_framework.throttling.UserRateThrottle'),
        
     'DEFAULT_THROTTLE_RATES': {
         'anon': '10/min',
