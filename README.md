@@ -194,13 +194,19 @@ Cada operação CRUD tem um teste independente com `setUp` criando um produto ba
 `data_criacao` formatada como `dd/mm/yyyy HH:MM:SS` no serializer com `read_only=True` — campo preenchido automaticamente pelo banco, sem input externo.
 
 **Autenticação JWT**
-Uso da framework djangorestframework-simplejwt , para restringir o acesso aos ndpoints.O servidor não precisa salvar informações da sessão em banco de dados ou memória. O token carregado pelo cliente contém tudo o que é necessário para a validação, o que facilita o escalonamento horizontal da aplicação
+Uso da biblioteca djangorestframework-simplejwt para restringir o acesso aos endpoints por meio de autenticação JWT. Como a API é stateless, o servidor não precisa armazenar informações de sessão em banco de dados ou memória. O token enviado pelo cliente contém os dados necessários para validação, facilitando o escalonamento horizontal da aplicação.
 ---
 
 ## 🚀 Status
 
 ✅ Concluído — API funcional com todos os testes passando.
-
+✅ Projeto concluído
+✅ CRUD funcional
+✅ Autenticação JWT implementada
+✅ Testes unitários passando
+✅ Integração com PostgreSQL
+✅ Cors implementados
+✅ DEPLOY ON RENDER
 ---
 
 ## 👨‍💻 Autor
