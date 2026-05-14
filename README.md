@@ -193,8 +193,12 @@ Cada operação CRUD tem um teste independente com `setUp` criando um produto ba
 **Serializer customizado**
 `data_criacao` formatada como `dd/mm/yyyy HH:MM:SS` no serializer com `read_only=True` — campo preenchido automaticamente pelo banco, sem input externo.
 
-**Autenticação JWT**
-Uso da biblioteca djangorestframework-simplejwt para restringir o acesso aos endpoints por meio de autenticação JWT. Como a API é stateless, o servidor não precisa armazenar informações de sessão em banco de dados ou memória. O token enviado pelo cliente contém os dados necessários para validação, facilitando o escalonamento horizontal da aplicação.
+## Autenticação JWT
+
+Uso da biblioteca `djangorestframework-simplejwt` para restringir o acesso aos endpoints por meio de autenticação JWT.
+
+Como a API é stateless, o servidor não precisa armazenar informações de sessão em banco de dados ou memória. O token enviado pelo cliente contém os dados necessários para validação, facilitando o escalonamento horizontal da aplicação.
+
 ---
 
 ## 🚀 Status
