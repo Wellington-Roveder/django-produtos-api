@@ -1,33 +1,32 @@
-# 🛒 Django REST CRUD — API de Produtos
-> Projeto de aprendizado focado em consolidar o uso do **Django REST Framework** e **testes unitários** com uma API CRUD completa.
+# 🛒 Django Produtos API
+
+> API REST completa de produtos com autenticação JWT, rate limiting, containerização Docker e deploy em produção no Render.
 
 ---
 
-## 📌 Objetivo
+## 📌 Sobre o projeto
 
-Construir uma API REST funcional do zero usando Django, com foco em:
-
-- Estruturar um projeto Django com boas práticas
-- Implementar operações CRUD completas com Django REST Framework
-- Escrever testes unitários para cada endpoint
-- Separar configurações sensíveis com variáveis de ambiente
+Projeto construído para consolidar uma stack sólida de mercado com Django REST Framework — indo além do CRUD básico, aplicando autenticação stateless, proteção contra abuso, boas práticas de segurança e deploy em ambiente real.
 
 ---
 
 ## 🛠️ Stack
 
-| Tecnologia | Uso |
-|---|---|
-| Python 3.x | Linguagem principal |
-| Django 6.x | Framework web |
-| Django REST Framework | Construção da API REST |
-| PostgreSQL | Banco de dados |
-| python-dotenv | Gerenciamento de variáveis de ambiente |
-| djangorestframework-simplejwt | autenticaçao jwt nos endpoints|
+| Tecnologia | Versão | Uso |
+|---|---|---|
+| Python | 3.x | Linguagem principal |
+| Django | 6.x | Framework web |
+| Django REST Framework | latest | Construção da API REST |
+| djangorestframework-simplejwt | latest | Autenticação JWT |
+| PostgreSQL | latest | Banco de dados |
+| Gunicorn | latest | Servidor WSGI em produção |
+| Docker | latest | Containerização |
+| python-dotenv | latest | Variáveis de ambiente |
+| django-cors-headers | latest | Configuração de CORS |
 
 ---
 
-## 📦 Instalação
+## 📦 Instalação local
 
 ```bash
 # Clone o repositório
@@ -52,16 +51,63 @@ python manage.py runserver
 
 ## ⚙️ Variáveis de ambiente
 
-Crie um arquivo `.env` na raiz baseado no `.env.example`:
+Crie um `.env` na raiz baseado no `.env.example`:
 
-```
+```env
+SECRET_KEY=
+DEBUG=
 DB_NAME=
 DB_USER=
 DB_PASSWORD=
 DB_HOST=
 DB_PORT=
-SECRET_KEY=
-DEBUG=
+```
+
+---
+
+## 🔐 Autenticação
+
+A API usa **JWT (JSON Web Token)** via `djangorestframework-simplejwt`. Todos os endpoints de produtos exigem autenticação.
+
+**Por que JWT e não sessão ou API Key?**
+JWT é stateless — o servidor não precisa manter estado de sessão, o que favorece escalabilidade horizontal. A troca foi aceita conscientemente: tokens JWT não podem ser revogados antes de expirar, então o tempo de expiração curto é a principal mitigação.
+
+### Obter token
+
+```http
+POST /api/token/
+Content-Type: application/json
+
+{
+  "username": "seu_usuario",
+  "password": "sua_senha"
+}
+```
+
+Resposta:
+
+```json
+{
+  "access": "<access_token>",
+  "refresh": "<refresh_token>"
+}
+```
+
+### Renovar token
+
+```http
+POST /api/token/refresh/
+Content-Type: application/json
+
+{
+  "refresh": "<refresh_token>"
+}
+```
+
+### Usar o token nas requisições
+
+```http
+Authorization: Bearer <access_token>
 ```
 
 ---
@@ -69,6 +115,8 @@ DEBUG=
 ## 🔗 Endpoints
 
 Base URL: `http://localhost:8000/api/`
+
+Todos os endpoints abaixo exigem o header `Authorization: Bearer <token>`.
 
 | Método | Endpoint | Descrição |
 |---|---|---|
@@ -79,40 +127,7 @@ Base URL: `http://localhost:8000/api/`
 | PATCH | `/produtos/{id}/` | Atualiza campos específicos |
 | DELETE | `/produtos/{id}/` | Remove um produto |
 
----
-## 🔐 Autenticação JWT
-
-Todos os endpoints exigem autenticação via Bearer Token.
-
-### Obter token
-
-**POST** `/api/token/`
-
-```json
-{
-    "username": "seu_usuario",
-    "password": "sua_senha"
-}
-```
-
-**Resposta:**
-```json
-{
-    "access": "token_de_acesso",
-    "refresh": "token_de_refresh"
-}
-```
-
-### Usar o token
-
-No header de cada requisição:
-```
-Authorization: Bearer {access_token}
-```
-
----
-
-## 📋 Exemplo de payload
+### Exemplo de payload
 
 ```json
 {
@@ -123,15 +138,73 @@ Authorization: Bearer {access_token}
 }
 ```
 
+### Exemplo de resposta
+
+```json
+{
+  "id": 1,
+  "nome": "Notebook Gamer",
+  "descricao": "Notebook para desenvolvimento",
+  "valor": "2999.99",
+  "quantidade": 10,
+  "data_criacao": "15/05/2025 14:30:00"
+}
+```
+
 ---
 
-## 🖥️ Interface
+## 🛡️ Segurança
 
-### GET — Listagem de produtos
-![GET API](assets/get_api.png)
+### Rate Limiting
 
-### POST — Criação com HTTP 201 Created
-![POST API](assets/post_api.png)
+Proteção contra abuso e força bruta via throttling do DRF:
+
+| Perfil | Limite | Raciocínio |
+|---|---|---|
+| Anônimo | 10 req/min | Barreira contra brute force — 10/min ainda é alto para um ataque real, mas equilibra usabilidade |
+| Autenticado | 1000 req/dia | Usuários legítimos tendem a disparar mais requisições; o limite é generoso sem abrir para abuso |
+
+### CORS
+
+Configurado via `django-cors-headers` para controlar quais origens podem consumir a API.
+
+### HTTPS
+
+`SECURE_SSL_REDIRECT = not DEBUG` em produção — requisições HTTP são redirecionadas automaticamente para HTTPS.Se DEBUG=True localmente, o redirect está desativado corretamente.Ativado automaticamente quando DEBUG=False  
+
+---
+
+## 🗄️ Banco de dados
+
+**Por que PostgreSQL e não SQLite?**
+
+SQLite não suporta bem múltiplas escritas concorrentes — em cenários com duas requisições simultâneas, uma pode bloquear a outra ou gerar corrupção. PostgreSQL lida com concorrência corretamente via MVCC, é o padrão de mercado para aplicações em produção e foi a escolha para já praticar com a stack real desde o início.
+
+- **Desenvolvimento:** PostgreSQL local
+- **Produção:** PostgreSQL provisionado pelo Render
+
+---
+
+## 🐳 Docker e Deploy
+
+### Por que Docker?
+
+O Dockerfile foi escrito manualmente para ter controle total sobre a build — garantindo que o ambiente de produção seja exatamente o que foi programado, sem surpresas de dependência ou versão.
+
+### Por que Gunicorn e não `runserver`?
+
+O `runserver` do Django é single-threaded e não foi feito para produção. O Gunicorn sobe múltiplos workers (instâncias do código), permitindo atender requisições simultâneas com segurança.
+
+### Por que Render?
+
+Custo previsível e deploy direto a partir do repositório GitHub — sem configuração manual de infraestrutura. A cada push na branch main, o Render faz o build e o deploy automaticamente.
+
+### Rodar com Docker localmente
+
+```bash
+docker build -t django-produtos-api .
+docker run -p 8000:8000 --env-file .env django-produtos-api
+```
 
 ---
 
@@ -141,18 +214,24 @@ Authorization: Bearer {access_token}
 python manage.py test
 ```
 
-Cobertura de testes implementada:
-
-| Teste | Descrição |
+| Teste | O que valida |
 |---|---|
-| `test_listar_produtos` | GET retorna status 200 |
+| `test_listar_produtos` | GET `/produtos/` retorna 200 com lista |
 | `test_criar_produto` | POST cria e persiste no banco |
 | `test_deletar_produto` | DELETE remove e confirma exclusão |
 | `test_put_produto` | PUT atualiza produto completo |
 | `test_atualizar_produto` | PATCH atualiza campos parciais |
 
-### Resultado dos testes
-![Testes unitários](assets/teste_unitario.png)
+Cada teste usa `setUp` para criar um produto base em banco isolado — o banco de testes é recriado a cada execução.
+
+### Próximos passos em testes
+
+A cobertura atual cobre o **caminho feliz** de cada operação. Os edge cases planejados são:
+
+- Requisição sem token deve retornar `401 Unauthorized`
+- Requisição com token expirado deve retornar `401`
+- POST com payload inválido deve retornar `400 Bad Request`
+- GET em produto inexistente deve retornar `404 Not Found`
 
 ---
 
@@ -170,9 +249,9 @@ django-produtos-api/
 │   ├── views.py           # ViewSet CRUD
 │   ├── admin.py           # Registro no admin
 │   └── tests.py           # Testes unitários dos endpoints
-├── assets/                # Screenshots da interface e testes
 ├── .env.example
 ├── .gitignore
+├── Dockerfile
 ├── requirements.txt
 └── manage.py
 ```
@@ -182,39 +261,29 @@ django-produtos-api/
 ## 📁 Decisões técnicas
 
 **ModelViewSet**
-Uso do `ModelViewSet` do DRF que entrega as 5 operações CRUD com mínimo de código — foco em entender o framework antes de customizar.
-
-**Testes com APITestCase**
-Cada operação CRUD tem um teste independente com `setUp` criando um produto base. O banco de testes é isolado e recriado a cada execução.
-
-**Variáveis de ambiente**
-`SECRET_KEY`, `DEBUG` e todas as credenciais do banco saem do código e vão para o `.env` — boas práticas desde o primeiro projeto.
+Abstrai as 5 operações CRUD e gera as URLs automaticamente via `router.register`. A escolha foi pela praticidade — entender o que o framework oferece antes de customizar. Para endpoints com lógica muito específica, a alternativa seria descer para `APIView` e ter controle total do comportamento.
 
 **Serializer customizado**
-`data_criacao` formatada como `dd/mm/yyyy HH:MM:SS` no serializer com `read_only=True` — campo preenchido automaticamente pelo banco, sem input externo.
+`data_criacao` é formatada como `dd/mm/yyyy HH:MM:SS` no serializer, mantendo a lógica de apresentação separada do model.
 
-## Autenticação JWT
-
-Uso da biblioteca `djangorestframework-simplejwt` para restringir o acesso aos endpoints por meio de autenticação JWT.
-
-Como a API é stateless, o servidor não precisa armazenar informações de sessão em banco de dados ou memória. O token enviado pelo cliente contém os dados necessários para validação, facilitando o escalonamento horizontal da aplicação.
+**Variáveis de ambiente**
+`SECURE_SSL_REDIRECT = not DEBUG` — requisições HTTP são redirecionadas automaticamente para HTTPS. Se `DEBUG=True` localmente, o redirect está desativado. Ativado automaticamente quando `DEBUG=False`.
 
 ---
 
 ## 🚀 Status
 
-✅ Concluído — API funcional com todos os testes passando.
-✅ Projeto concluído
-✅ CRUD funcional
-✅ Autenticação JWT implementada
-✅ Testes unitários passando
-✅ Integração com PostgreSQL
-✅ Cors implementados
-✅ DEPLOY ON RENDER
+✅ Funcional em produção — todos os testes passando.
+
+**Melhorias planejadas:**
+- [ ] Testes de autenticação e edge cases HTTP
+- [ ] Paginação nos resultados de listagem
+- [ ] Filtros e busca por nome/categoria
+
 ---
 
 ## 👨‍💻 Autor
 
-**Wellington Roveder**
-Estudante de Ciência da Computação
+**Wellington Roveder** — Estudante de Ciência da Computação
+
 [LinkedIn](https://www.linkedin.com/in/wellington-roveder-04637b37b/) · [GitHub](https://github.com/Wellington-Roveder)
