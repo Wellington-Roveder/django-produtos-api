@@ -1,5 +1,7 @@
 # 🛒 Django Produtos API
 
+> 🔗 **API em produção:** https://django-produtos-api.onrender.com/api
+
 > API REST completa de produtos com autenticação JWT, rate limiting, containerização Docker e deploy em produção no Render.
 
 ---
